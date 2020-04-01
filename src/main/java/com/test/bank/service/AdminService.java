@@ -30,6 +30,7 @@ public class AdminService {
         AdminUser adminUser = DSL.using(jooqConfiguration).fetchOne(ADMIN, ADMIN.ACCOUNT.eq(account)).into(AdminUser.class);
         if (PasswordUtils.verifyUserPassword(password, adminUser.getPassword(), adminUser.getSalt())) {
             token = generateToken();
+            //token = "{{homeprojcet-token}}";
             DSL.using(jooqConfiguration).insertInto(TOKEN, TOKEN.ADMINID, TOKEN.TOKEN_)
                     .values(UInteger.valueOf(adminUser.getId()), token)
                     .onDuplicateKeyUpdate()
@@ -40,7 +41,11 @@ public class AdminService {
     }
 
     public boolean authenticate(String token) {
-        // TODO implement authenticate
+        int count = DSL.using(jooqConfiguration).select()
+                .from(TOKEN)
+                .where(TOKEN.TOKEN_.eq(token))
+                .execute();
+        if (count != 0) { return true; }
         return false;
     }
 
